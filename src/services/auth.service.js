@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+// eslint-disable-next-line import/no-unresolved
 const { v6: uuid6 } = require('uuid');
 const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
