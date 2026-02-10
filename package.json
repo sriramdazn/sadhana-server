@@ -47,7 +47,7 @@
     "cross-env": "^7.0.0",
     "dotenv": "^10.0.0",
     "express": "^5.2.1",
-    "express-mongo-sanitize": "^2.0.0",
+    "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^5.0.0",
     "helmet": "^4.1.0",
     "http-status": "^1.4.0",
@@ -65,7 +65,7 @@
     "uuid": "^13.0.0",
     "validator": "^13.0.0",
     "winston": "^3.2.1",
-    "xss-clean": "^0.1.1"
+    "xss-clean": "^0.1.4"
   },
   "devDependencies": {
     "coveralls": "^3.0.7",

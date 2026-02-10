@@ -1,15 +1,8 @@
 const Joi = require('joi');
 
-const register = {
+const userAuth = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-  }),
-};
-
-const login = {
-  body: Joi.object().keys({
-    email: Joi.string().required(),
-    password: Joi.string().required(),
   }),
 };
 
@@ -21,13 +14,13 @@ const logout = {
 
 const verifyEmail = {
   query: Joi.object().keys({
-    token: Joi.string().required(),
+    otpId: Joi.string().required(),
+    otp: Joi.number().required(),
   }),
 };
 
 module.exports = {
-  register,
-  login,
+  userAuth,
   logout,
   verifyEmail,
 };

@@ -30,6 +30,10 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 50,
     },
+    decayPoints: {
+      type: Number,
+      default: -50,
+    },
   },
   {
     timestamps: true,
