@@ -6,15 +6,9 @@ const userController = require('../../controllers/user.controller');
 
 const router = express.Router();
 
-router
-  .route('/')
-  .post(auth('manageUsers'), validate(userValidation.createUser), userController.createUser)
-  .get(auth('getUsers'), validate(userValidation.getUsers), userController.getUsers);
-
-router
-  .route('/:userId')
-  .get(auth('getUsers'), validate(userValidation.getUser), userController.getUser)
-  .delete(auth('manageUsers'), validate(userValidation.deleteUser), userController.deleteUser);
+router.route('/').get(auth(), userController.getAuthUser);
+router.route('/:userId').get(auth('getUsers'), validate(userValidation.getUser), userController.getUser);
+router.route('/').get(auth('getUsers'), validate(userValidation.getUsers), userController.getUsers);
 
 module.exports = router;
 

@@ -8,7 +8,6 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<User>}
  */
 const createUser = async (userBody) => {
-  console.log('first-userBody', userBody);
   const user = new User(userBody);
   await user.save();
   return user;

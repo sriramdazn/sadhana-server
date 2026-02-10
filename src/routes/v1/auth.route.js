@@ -6,10 +6,10 @@ const authController = require('../../controllers/auth.controller');
 const router = express.Router();
 
 router.post('/register', validate(authValidation.userAuth), authController.registerRequestOtp);
-router.post('/login', validate(authValidation.userAuth), authController.loginRequestOtp);
-router.post('/logout', validate(authValidation.logout), authController.logout);
 router.post('/verify-register-email', validate(authValidation.verifyEmail), authController.verifyRegisterOtp);
+router.post('/login', validate(authValidation.userAuth), authController.loginRequestOtp);
 router.post('/verify-login-email', validate(authValidation.verifyEmail), authController.verifyLoginOtp);
+router.post('/logout', validate(authValidation.logout), authController.logout);
 
 module.exports = router;
 

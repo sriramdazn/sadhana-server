@@ -28,6 +28,10 @@ const verifyRegisterOtp = catchAsync(async (req, res) => {
 
 const loginRequestOtp = catchAsync(async (req, res) => {
   const { email } = req.body;
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
   const otp = generateOtp();
   const savedOtp = await authService.saveOtp(email, otp);
   await emailService.sendEmail(email, 'Email Verification', `Your verification code is ${otp}`);
@@ -36,8 +40,12 @@ const loginRequestOtp = catchAsync(async (req, res) => {
 
 const verifyLoginOtp = catchAsync(async (req, res) => {
   const { otpId, otp } = req.body;
-  const validateUser = await authService.verifyOtp(otpId, otp);
-  const tokens = await tokenService.generateAuthTokens(validateUser);
+  const validateOtp = await authService.verifyOtp(otpId, otp);
+  const user = await userService.getUserByEmail(validateOtp.email);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  const tokens = await tokenService.generateAuthTokens(user);
   res.status(httpStatus.OK).send(tokens);
 });
 
