@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const mongoose = require('mongoose');
 const { User, SadanaTracker, Sadana } = require('../models');
 const ApiError = require('../utils/ApiError');
 
@@ -8,8 +9,8 @@ const normalizeDate = (date) => {
   return d;
 };
 
-const getSadanas = async () => {
-  return SadanaTracker.find();
+const getSadanas = async (userId) => {
+  return SadanaTracker.find({ user: userId }).sort({ date: -1 });
 };
 
 const getSadanasForLast7Days = async (userId, date) => {
@@ -97,9 +98,7 @@ const recalcUserSadhanaPoints = async (userId) => {
     .select('_id points')
     .lean();
 
-  const pointsMap = new Map(
-    sadanas.map((s) => [s._id.toString(), s.points])
-  );
+  const pointsMap = new Map(sadanas.map((s) => [s._id.toString(), s.points]));
 
   const totalPoints = allSadanaIds.reduce((sum, id) => {
     return sum + (pointsMap.get(id.toString()) || 0);
@@ -110,10 +109,34 @@ const recalcUserSadhanaPoints = async (userId) => {
   return totalPoints;
 };
 
+const syncUserSadanas = async (userId, data) => {
+  const operations = data.map((item) => ({
+    updateOne: {
+      filter: {
+        user: userId,
+        date: normalizeDate(item.date),
+      },
+      update: {
+        $addToSet: {
+          optedSadanas: {
+            $each: item.optedSadanas.map((id) => new mongoose.Types.ObjectId(id)),
+          },
+        },
+      },
+      upsert: true,
+    },
+  }));
+
+  await SadanaTracker.bulkWrite(operations);
+
+  return { success: true };
+};
+
 module.exports = {
   getSadanas,
   getSadanasForLast7Days,
   deleteOptedSadana,
   addOptedSadana,
   recalcUserSadhanaPoints,
+  syncUserSadanas,
 };

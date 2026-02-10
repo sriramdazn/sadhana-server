@@ -1,51 +1,33 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, userService, tokenService, emailService } = require('../services');
-const { User } = require('../models');
-const ApiError = require('../utils/ApiError');
+const { authService, userService, tokenService, emailService, sadanaTrackerService } = require('../services');
 const { generateOtp } = require('../utils/util');
 
-const registerRequestOtp = catchAsync(async (req, res) => {
+const requestOtpForEmail = catchAsync(async (req, res) => {
   const { email } = req.body;
-
-  if (await User.isEmailTaken(email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  }
-
   const otp = generateOtp();
   const savedOtp = await authService.saveOtp(email, otp);
   await emailService.sendEmail(email, 'Email Verification', `Your verification code is ${otp}`);
   res.status(httpStatus.OK).send({ otpId: savedOtp.otpId, message: 'Verification OTP sent to email' });
 });
 
-const verifyRegisterOtp = catchAsync(async (req, res) => {
-  const { otpId, otp } = req.body;
-  const validateUser = await authService.verifyOtp(otpId, otp);
-  const user = await userService.createUser({ email: validateUser.email, isEmailVerified: true });
-  const tokens = await tokenService.generateAuthTokens(user);
-  res.status(httpStatus.CREATED).send({ user, ...tokens });
-});
+const verifyOtpAndAuthenticate = catchAsync(async (req, res) => {
+  const { otpId, otp, sadanas } = req.body;
 
-const loginRequestOtp = catchAsync(async (req, res) => {
-  const { email } = req.body;
-  const user = await userService.getUserByEmail(email);
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-  }
-  const otp = generateOtp();
-  const savedOtp = await authService.saveOtp(email, otp);
-  await emailService.sendEmail(email, 'Email Verification', `Your verification code is ${otp}`);
-  res.status(httpStatus.OK).send({ otpId: savedOtp.otpId, message: 'Verification OTP sent to email' });
-});
+  const validatedOtp = await authService.verifyOtp(otpId, otp);
 
-const verifyLoginOtp = catchAsync(async (req, res) => {
-  const { otpId, otp } = req.body;
-  const validateOtp = await authService.verifyOtp(otpId, otp);
-  const user = await userService.getUserByEmail(validateOtp.email);
+  let user = await userService.getUserByEmail(validatedOtp.email);
+
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    user = await userService.createUser({
+      email: validatedOtp.email,
+      isEmailVerified: true,
+    });
   }
   const tokens = await tokenService.generateAuthTokens(user);
+  if (sadanas && sadanas.length > 0) {
+    await sadanaTrackerService.syncUserSadanas(user.id, sadanas);
+  }
   res.status(httpStatus.OK).send(tokens);
 });
 
@@ -55,9 +37,7 @@ const logout = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-  registerRequestOtp,
-  loginRequestOtp,
+  requestOtpForEmail,
+  verifyOtpAndAuthenticate,
   logout,
-  verifyRegisterOtp,
-  verifyLoginOtp,
 };
