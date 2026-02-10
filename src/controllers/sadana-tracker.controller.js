@@ -1,5 +1,4 @@
 const httpStatus = require('http-status');
-const { User, Sadana, SadanaTracker } = require('../models');
 const { sadanaTrackerService } = require('../services');
 
 const getFullSadanaTracker = async (req, res) => {
@@ -11,42 +10,23 @@ const getFullSadanaTracker = async (req, res) => {
 };
 
 const getSadanaTrackerForLast7Days = async (req, res) => {
-  const sadhanas = await sadanaTrackerService.getSadanasForLast7Days(req.body.email);
+  const userId = req.user._id;
+
+  const sadhanas = await sadanaTrackerService.getSadanasForLast7Days(userId);
 
   res.status(httpStatus.OK).json({
     data: sadhanas,
   });
 };
 
-const recalcUserSadhanaPoints = async (email) => {
-  const trackers = await SadanaTracker.find({ email }).lean();
-
-  if (!trackers.length) return 0;
-
-  const allSadanaIds = trackers.flatMap((t) => t.optedSadanas);
-
-  if (!allSadanaIds.length) return 0;
-
-  const sadanas = await Sadana.find({ _id: { $in: allSadanaIds } }).lean();
-
-  const pointsMap = new Map(sadanas.map((s) => [s._id.toString(), s.points]));
-
-  const totalPoints = allSadanaIds.reduce((sum, id) => {
-    const pts = pointsMap.get(id.toString()) || 0;
-    return sum + pts;
-  }, 0);
-
-  await User.findOneAndUpdate({ email }, { sadhanaPoints: totalPoints });
-
-  return totalPoints;
-};
-
 const addOptedSadana = async (req, res) => {
-  const { email, date, sadanaId } = req.body;
+  const userId = req.user._id;
+  const { date, sadanaId } = req.body;
 
-  const updatedEntry = await sadanaTrackerService.addOptedSadana(email, date, sadanaId);
+  const updatedEntry =
+    await sadanaTrackerService.addOptedSadana(userId, date, sadanaId);
 
-  const totalPoints = await recalcUserSadhanaPoints(email);
+  const totalPoints = await sadanaTrackerService.recalcUserSadhanaPoints(userId);
 
   res.status(httpStatus.OK).json({
     message: 'Opted Sadana added successfully',
@@ -56,11 +36,13 @@ const addOptedSadana = async (req, res) => {
 };
 
 const deleteOptedSadana = async (req, res) => {
-  const { email, date, sadanaId } = req.body;
+  const userId = req.user._id;
+  const { date, sadanaId } = req.body;
 
-  const updatedEntry = await sadanaTrackerService.deleteOptedSadana(email, date, sadanaId);
+  const updatedEntry =
+    await sadanaTrackerService.deleteOptedSadana(userId, date, sadanaId);
 
-  const totalPoints = await recalcUserSadhanaPoints(email);
+  const totalPoints = await sadanaTrackerService.recalcUserSadhanaPoints(userId);
 
   res.status(httpStatus.OK).json({
     message: 'Opted Sadana deleted successfully',

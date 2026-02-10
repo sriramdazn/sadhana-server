@@ -1,4 +1,4 @@
-const { SadanaTracker, Sadana } = require('../models');
+const { User, SadanaTracker, Sadana } = require('../models');
 
 const normalizeDate = (date) => {
   const d = new Date(date);
@@ -10,14 +10,14 @@ const getSadanas = async () => {
   return SadanaTracker.find();
 };
 
-const getSadanasForLast7Days = async (email) => {
+const getSadanasForLast7Days = async (userId) => {
   const today = normalizeDate(new Date());
 
   const sevenDaysAgo = new Date(today);
   sevenDaysAgo.setDate(today.getDate() - 6);
 
   return SadanaTracker.find({
-    email,
+    user: userId,
     date: {
       $gte: sevenDaysAgo,
       $lte: today,
@@ -25,23 +25,22 @@ const getSadanasForLast7Days = async (email) => {
   }).sort({ date: -1 });
 };
 
-const addOptedSadana = async (email, date, sadanaId) => {
+const addOptedSadana = async (userId, date, sadanaId) => {
   const normalizedDate = normalizeDate(date);
 
-  const sadana = await Sadana.findById(sadanaId).lean();
-
-  if (!sadana) {
+  const sadanaExists = await Sadana.exists({ _id: sadanaId });
+  if (!sadanaExists) {
     throw new Error('Invalid sadanaId');
   }
 
   const existingEntry = await SadanaTracker.findOne({
-    email,
+    user: userId,
     date: normalizedDate,
   });
 
   if (!existingEntry) {
     return SadanaTracker.create({
-      email,
+      user: userId,
       date: normalizedDate,
       optedSadanas: [sadanaId],
     });
@@ -60,12 +59,12 @@ const addOptedSadana = async (email, date, sadanaId) => {
   );
 };
 
-const deleteOptedSadana = async (email, date, sadanaId) => {
+const deleteOptedSadana = async (userId, date, sadanaId) => {
   const normalizedDate = normalizeDate(date);
 
   return SadanaTracker.findOneAndUpdate(
     {
-      email,
+      user: userId,
       date: normalizedDate,
     },
     {
@@ -77,9 +76,42 @@ const deleteOptedSadana = async (email, date, sadanaId) => {
   );
 };
 
+const recalcUserSadhanaPoints = async (userId) => {
+  const trackers = await SadanaTracker.find({ user: userId }).lean();
+
+  if (!trackers.length) {
+    await User.findByIdAndUpdate(userId, { sadhanaPoints: 0 });
+    return 0;
+  }
+
+  const allSadanaIds = trackers.flatMap((t) => t.optedSadanas);
+
+  if (!allSadanaIds.length) {
+    await User.findByIdAndUpdate(userId, { sadhanaPoints: 0 });
+    return 0;
+  }
+
+  const sadanas = await Sadana.find({ _id: { $in: allSadanaIds } })
+    .select('_id points')
+    .lean();
+
+  const pointsMap = new Map(
+    sadanas.map((s) => [s._id.toString(), s.points])
+  );
+
+  const totalPoints = allSadanaIds.reduce((sum, id) => {
+    return sum + (pointsMap.get(id.toString()) || 0);
+  }, 0);
+
+  await User.findByIdAndUpdate(userId, { sadhanaPoints: totalPoints });
+
+  return totalPoints;
+};
+
 module.exports = {
   getSadanas,
   getSadanasForLast7Days,
   deleteOptedSadana,
   addOptedSadana,
+  recalcUserSadhanaPoints,
 };

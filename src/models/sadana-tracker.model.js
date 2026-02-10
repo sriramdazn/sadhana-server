@@ -1,19 +1,13 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
 const { toJSON, paginate } = require('./plugins');
 
 const sadanaTrackerSchema = mongoose.Schema(
   {
-    email: {
-      type: String,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
-      trim: true,
-      lowercase: true,
-      validate(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error('Invalid email');
-        }
-      },
+      index: true,
     },
 
     date: {
@@ -30,7 +24,7 @@ const sadanaTrackerSchema = mongoose.Schema(
 );
 
 // ✅ Ensure one entry per user per day
-sadanaTrackerSchema.index({ email: 1, date: 1 }, { unique: true });
+sadanaTrackerSchema.index({ user: 1, date: 1 }, { unique: true });
 
 sadanaTrackerSchema.plugin(toJSON);
 sadanaTrackerSchema.plugin(paginate);
