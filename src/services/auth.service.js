@@ -4,7 +4,6 @@ const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 const { Otp } = require('../models');
-const config = require('../config/config');
 
 /**
  * Save OTP
@@ -14,7 +13,7 @@ const config = require('../config/config');
  */
 const saveOtp = async (email, otp) => {
   const otpId = uuid6();
-  const expiresAt = new Date(Date.now() + config.jwt.verifyEmailExpirationMinutes * 60 * 1000);
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
   const otpRecord = await Otp.create({ email, otp, otpId, expiresAt });
   return otpRecord;
 };
