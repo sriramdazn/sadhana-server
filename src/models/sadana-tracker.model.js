@@ -16,10 +16,12 @@ const sadanaTrackerSchema = mongoose.Schema(
       index: true,
     },
 
-    optedSadanas: {
-      type: [Number],
-      default: [],
-    },
+    optedSadanas: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Sadana',
+      },
+    ],
   }
 );
 
