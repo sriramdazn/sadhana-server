@@ -1,14 +1,9 @@
 const httpStatus = require('http-status');
 const { User, Sadana, SadanaTracker } = require('../models');
-const {
-  getSadanas,
-  getSadanasForLast7Days,
-  deleteOptedSadana: deleteSadanaTrackerEntry,
-  addOptedSadana: addSadanaTrackerEntry,
-} = require('../services/sadana-tracker.service');
+const { sadanaTrackerService } = require('../services');
 
 const getFullSadanaTracker = async (req, res) => {
-  const sadhanas = await getSadanas();
+  const sadhanas = await sadanaTrackerService.getSadanas();
 
   res.status(httpStatus.OK).json({
     data: sadhanas,
@@ -16,7 +11,7 @@ const getFullSadanaTracker = async (req, res) => {
 };
 
 const getSadanaTrackerForLast7Days = async (req, res) => {
-  const sadhanas = await getSadanasForLast7Days(req.body.email);
+  const sadhanas = await sadanaTrackerService.getSadanasForLast7Days(req.body.email);
 
   res.status(httpStatus.OK).json({
     data: sadhanas,
@@ -49,7 +44,7 @@ const recalcUserSadhanaPoints = async (email) => {
 const addOptedSadana = async (req, res) => {
   const { email, date, sadanaId } = req.body;
 
-  const updatedEntry = await addSadanaTrackerEntry(email, date, sadanaId);
+  const updatedEntry = await sadanaTrackerService.addOptedSadana(email, date, sadanaId);
 
   const totalPoints = await recalcUserSadhanaPoints(email);
 
@@ -63,7 +58,7 @@ const addOptedSadana = async (req, res) => {
 const deleteOptedSadana = async (req, res) => {
   const { email, date, sadanaId } = req.body;
 
-  const updatedEntry = await deleteSadanaTrackerEntry(email, date, sadanaId);
+  const updatedEntry = await sadanaTrackerService.deleteOptedSadana(email, date, sadanaId);
 
   const totalPoints = await recalcUserSadhanaPoints(email);
 

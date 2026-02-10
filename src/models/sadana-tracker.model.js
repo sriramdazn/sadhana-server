@@ -22,11 +22,6 @@ const sadanaTrackerSchema = mongoose.Schema(
       index: true,
     },
 
-    totalSadhanaPoints: {
-      type: Number,
-      default: 0,
-    },
-
     optedSadanas: {
       type: [Number],
       default: [],

@@ -34,8 +34,6 @@ const addOptedSadana = async (email, date, sadanaId) => {
     throw new Error('Invalid sadanaId');
   }
 
-  const points = sadana.points;
-
   const existingEntry = await SadanaTracker.findOne({
     email,
     date: normalizedDate,
@@ -46,7 +44,6 @@ const addOptedSadana = async (email, date, sadanaId) => {
       email,
       date: normalizedDate,
       optedSadanas: [sadanaId],
-      totalSadhanaPoints: points,
     });
   }
 
@@ -58,7 +55,6 @@ const addOptedSadana = async (email, date, sadanaId) => {
     existingEntry._id,
     {
       $addToSet: { optedSadanas: sadanaId },
-      $inc: { totalSadhanaPoints: points },
     },
     { new: true }
   );
