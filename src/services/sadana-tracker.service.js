@@ -1,4 +1,6 @@
+const httpStatus = require('http-status');
 const { User, SadanaTracker, Sadana } = require('../models');
+const ApiError = require('../utils/ApiError');
 
 const normalizeDate = (date) => {
   const d = new Date(date);
@@ -30,7 +32,7 @@ const addOptedSadana = async (userId, date, sadanaId) => {
 
   const sadanaExists = await Sadana.exists({ _id: sadanaId });
   if (!sadanaExists) {
-    throw new Error('Invalid sadanaId');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid sadanaId');
   }
 
   const existingEntry = await SadanaTracker.findOne({
@@ -47,7 +49,7 @@ const addOptedSadana = async (userId, date, sadanaId) => {
   }
 
   if (existingEntry.optedSadanas.includes(sadanaId)) {
-    return existingEntry;
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Sadana already opted for this date');
   }
 
   return SadanaTracker.findByIdAndUpdate(
