@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const { getSadanas, createSadana, deleteAllSadanas } = require('../services/sadana.service');
+const { getTotalPoints } = require('../services/totalPoints.service');
 
 const listSadanas = async (req, res) => {
   const sadhanas = await getSadanas();
@@ -25,8 +26,21 @@ const deleteSadanas = async (req, res) => {
   });
 };
 
+const getPoints = async (req, res) => {
+  try {
+    const result = await getTotalPoints(req.body.id);
+
+    res.status(httpStatus.OK).json({
+      totalPoints: result,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   listSadanas,
   addSadana,
   deleteSadanas,
+  getPoints,
 };
