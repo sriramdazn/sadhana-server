@@ -10,9 +10,10 @@ const getFullSadanaTracker = async (req, res) => {
 };
 
 const getSadanaTrackerForLast7Days = async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.id;
+  const { date } = req.body;
 
-  const sadhanas = await sadanaTrackerService.getSadanasForLast7Days(userId);
+  const sadhanas = await sadanaTrackerService.getSadanasForLast7Days(userId, date);
 
   res.status(httpStatus.OK).json({
     data: sadhanas,
@@ -20,7 +21,7 @@ const getSadanaTrackerForLast7Days = async (req, res) => {
 };
 
 const addOptedSadana = async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.id;
   const { date, sadanaId } = req.body;
 
   const updatedEntry =
@@ -36,7 +37,7 @@ const addOptedSadana = async (req, res) => {
 };
 
 const deleteOptedSadana = async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.id;
   const { date, sadanaId } = req.body;
 
   const updatedEntry =

@@ -10,8 +10,8 @@ const getSadanas = async () => {
   return SadanaTracker.find();
 };
 
-const getSadanasForLast7Days = async (userId) => {
-  const today = normalizeDate(new Date());
+const getSadanasForLast7Days = async (userId, date) => {
+  const today = normalizeDate(new Date(date || Date.now()));
 
   const sevenDaysAgo = new Date(today);
   sevenDaysAgo.setDate(today.getDate() - 6);
