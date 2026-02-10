@@ -5,7 +5,7 @@ const {
   getSadanasForLast7Days,
   deleteOptedSadana: deleteSadanaTrackerEntry,
   addOptedSadana: addSadanaTrackerEntry,
-} = require('../services/sadanaTracker.service');
+} = require('../services/sadana-tracker.service');
 
 const getFullSadanaTracker = async (req, res) => {
   const sadhanas = await getSadanas();

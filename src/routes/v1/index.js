@@ -3,7 +3,7 @@ const authRoute = require('./auth.route');
 const userRoute = require('./user.route');
 const docsRoute = require('./docs.route');
 const sadanaRoute = require('./sadana.route');
-const sadanaTrackerRoute = require('./sadanaTracker.route');
+const sadanaTrackerRoute = require('./sadana-tracker.route');
 const config = require('../../config/config');
 
 const router = express.Router();
