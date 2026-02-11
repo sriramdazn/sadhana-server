@@ -1,7 +1,8 @@
 const httpStatus = require('http-status');
 const mongoose = require('mongoose');
-const { User, SadanaTracker, Sadana } = require('../models');
+const { SadanaTracker, Sadana } = require('../models');
 const ApiError = require('../utils/ApiError');
+const { userService } = require('./index');
 
 const normalizeDate = (date) => {
   const d = new Date(date);
@@ -32,6 +33,7 @@ const addOptedSadana = async (userId, date, sadanaId) => {
   const normalizedDate = normalizeDate(date);
 
   const sadanaExists = await Sadana.exists({ _id: sadanaId });
+
   if (!sadanaExists) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid sadanaId');
   }
@@ -83,14 +85,14 @@ const recalcUserSadhanaPoints = async (userId) => {
   const trackers = await SadanaTracker.find({ user: userId }).lean();
 
   if (!trackers.length) {
-    await User.findByIdAndUpdate(userId, { sadhanaPoints: 0 });
+    await userService.updateUserById(userId, { sadhanaPoints: 0 });
     return 0;
   }
 
   const allSadanaIds = trackers.flatMap((t) => t.optedSadanas);
 
   if (!allSadanaIds.length) {
-    await User.findByIdAndUpdate(userId, { sadhanaPoints: 0 });
+    await userService.updateUserById(userId, { sadhanaPoints: 0 });
     return 0;
   }
 
@@ -104,7 +106,7 @@ const recalcUserSadhanaPoints = async (userId) => {
     return sum + (pointsMap.get(id.toString()) || 0);
   }, 0);
 
-  await User.findByIdAndUpdate(userId, { sadhanaPoints: totalPoints });
+  await userService.updateUserById(userId, { sadhanaPoints: totalPoints });
 
   return totalPoints;
 };

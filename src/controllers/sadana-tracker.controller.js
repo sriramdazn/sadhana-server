@@ -5,7 +5,7 @@ const getFullSadanaTracker = async (req, res) => {
   const userId = req.user.id;
   const sadhanas = await sadanaTrackerService.getSadanas(userId);
 
-  res.status(httpStatus.OK).json({
+  res.status(httpStatus.OK).send({
     data: sadhanas,
   });
 };
@@ -16,7 +16,7 @@ const getSadanaTrackerForLast7Days = async (req, res) => {
 
   const sadhanas = await sadanaTrackerService.getSadanasForLast7Days(userId, date);
 
-  res.status(httpStatus.OK).json({
+  res.status(httpStatus.OK).send({
     data: sadhanas,
   });
 };
@@ -29,8 +29,8 @@ const addOptedSadana = async (req, res) => {
 
   const totalPoints = await sadanaTrackerService.recalcUserSadhanaPoints(userId);
 
-  res.status(httpStatus.OK).json({
-    message: 'Opted Sadana added successfully',
+  res.status(httpStatus.OK).send({
+    message: 'Sadana Opted Successfully',
     data: updatedEntry,
     totalSadhanaPoints: totalPoints,
   });
@@ -44,8 +44,8 @@ const deleteOptedSadana = async (req, res) => {
 
   const totalPoints = await sadanaTrackerService.recalcUserSadhanaPoints(userId);
 
-  res.status(httpStatus.OK).json({
-    message: 'Opted Sadana deleted successfully',
+  res.status(httpStatus.OK).send({
+    message: 'Opted Sadana Deleted Successfully',
     data: updatedEntry,
     totalSadhanaPoints: totalPoints,
   });
