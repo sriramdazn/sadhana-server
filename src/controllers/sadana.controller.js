@@ -1,26 +1,24 @@
 const httpStatus = require('http-status');
-const { getSadanas, createSadana, deleteAllSadanas } = require('../services/sadana.service');
+const { sadanaService } = require('../services');
 
 const listSadanas = async (req, res) => {
-  const sadhanas = await getSadanas();
-
-  res.status(httpStatus.OK).json({
+  const sadhanas = await sadanaService.getSadanas();
+  res.status(httpStatus.OK).send({
     data: sadhanas,
   });
 };
 
 const addSadana = async (req, res) => {
-  const sadhana = await createSadana(req.body);
-
-  res.status(httpStatus.CREATED).json({
+  const sadhana = await sadanaService.createSadana(req.body);
+  res.status(httpStatus.CREATED).send({
     message: 'Sadhana created successfully',
     data: sadhana,
   });
 };
 
 const deleteSadanas = async (req, res) => {
-  await deleteAllSadanas();
-  res.status(httpStatus.OK).json({
+  await sadanaService.deleteAllSadanas();
+  res.status(httpStatus.OK).send({
     message: 'Sadhanas deleted successfully',
   });
 };
