@@ -4,10 +4,16 @@ const { SadanaTracker, Sadana } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { userService } = require('./index');
 
-const normalizeDate = (date) => {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
+const normalizeDate = (dateString) => {
+  const parts = dateString.split('-');
+
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+
+  const d = new Date(Date.UTC(year, month, day));
+
+  return d.toISOString();
 };
 
 const getSadanas = async (userId) => {
@@ -65,12 +71,10 @@ const addOptedSadana = async (userId, date, sadanaId) => {
 };
 
 const deleteOptedSadana = async (userId, date, sadanaId) => {
-  const normalizedDate = normalizeDate(date);
-
-  return SadanaTracker.findOneAndUpdate(
+  const updatedEntry = await SadanaTracker.findOneAndUpdate(
     {
       user: userId,
-      date: normalizedDate,
+      date: normalizeDate(date),
     },
     {
       $pull: { optedSadanas: sadanaId },
@@ -79,6 +83,15 @@ const deleteOptedSadana = async (userId, date, sadanaId) => {
       new: true,
     }
   );
+
+  if (!updatedEntry) return null;
+
+  if (!updatedEntry.optedSadanas || updatedEntry.optedSadanas.length === 0) {
+    await SadanaTracker.deleteOne({ _id: updatedEntry._id });
+    return null;
+  }
+
+  return updatedEntry;
 };
 
 const recalcUserSadhanaPoints = async (userId) => {
