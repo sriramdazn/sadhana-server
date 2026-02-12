@@ -16,6 +16,7 @@ const verifyEmail = {
   body: Joi.object().keys({
     otpId: Joi.string().required(),
     otp: Joi.number().required(),
+    sadanas: Joi.array(),
   }),
 };
 
