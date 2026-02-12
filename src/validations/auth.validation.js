@@ -13,7 +13,7 @@ const logout = {
 };
 
 const verifyEmail = {
-  query: Joi.object().keys({
+  body: Joi.object().keys({
     otpId: Joi.string().required(),
     otp: Joi.number().required(),
   }),
