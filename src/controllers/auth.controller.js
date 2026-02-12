@@ -32,8 +32,8 @@ const verifyOtpAndAuthenticate = catchAsync(async (req, res) => {
 });
 
 const logout = catchAsync(async (req, res) => {
-  await authService.logout(req.body.accessToken);
-  res.status(httpStatus.NO_CONTENT).send();
+  await authService.logout(req.user.id);
+  res.status(httpStatus.OK).send({ message: 'Logged out successfully' });
 });
 
 module.exports = {

@@ -1,5 +1,6 @@
 const express = require('express');
 const validate = require('../../middlewares/validate');
+const auth = require('../../middlewares/auth');
 const authValidation = require('../../validations/auth.validation');
 const authController = require('../../controllers/auth.controller');
 
@@ -7,7 +8,7 @@ const router = express.Router();
 
 router.post('/register', validate(authValidation.userAuth), authController.requestOtpForEmail);
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyOtpAndAuthenticate);
-router.post('/logout', validate(authValidation.logout), authController.logout);
+router.route('/logout').post(auth(), validate(authValidation.logout), authController.logout);
 
 module.exports = router;
 

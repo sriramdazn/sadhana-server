@@ -42,15 +42,14 @@ const verifyOtp = async (otpId, otp) => {
 
 /**
  * Logout
- * @param {string} accessToken
+ * @param {string} userId
  * @returns {Promise}
  */
-const logout = async (accessToken) => {
-  const accessTokenDoc = await Token.findOne({ token: accessToken, type: tokenTypes.ACCESS, blacklisted: false });
+const logout = async (userId) => {
+  const accessTokenDoc = await Token.findOneAndDelete({ user: userId, type: tokenTypes.ACCESS, blacklisted: false });
   if (!accessTokenDoc) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'Token not found / User already logged out');
   }
-  await accessTokenDoc.remove();
 };
 
 module.exports = {
