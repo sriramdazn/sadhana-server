@@ -7,6 +7,7 @@ const startDecayJob = require('./jobs/decay.job');
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
+  mongoose.set('updatePipeline', true);
   startDecayJob();
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);

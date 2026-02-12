@@ -6,7 +6,7 @@ const logger = require('../config/logger');
 const startDecayJob = () => {
   cron.schedule('0 0 * * *', async () => {
     try {
-      await User.updateMany({}, { $inc: { sadhanaPoints: -50 } });
+      await User.updateMany({}, [{ $set: { sadhanaPoints: { $add: ['$sadhanaPoints', '$decayPoints'] } } }]);
     } catch (error) {
       logger.error('Decay', error);
     }
