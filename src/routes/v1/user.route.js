@@ -5,6 +5,7 @@ const userController = require('../../controllers/user.controller');
 const router = express.Router();
 
 router.route('/').get(auth(), userController.getAuthUser);
+router.route('/').patch(auth(), userController.updateUser);
 router.route('/retriev-all').get(auth('getUsers'), userController.getUsers);
 
 module.exports = router;
