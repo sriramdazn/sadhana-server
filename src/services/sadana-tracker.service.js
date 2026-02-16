@@ -16,6 +16,17 @@ const normalizeDate = (dateString) => {
   return d.toISOString();
 };
 
+const normalizeDateTime = (dateTimeString) => {
+  console.log('dateTimeString: ', dateTimeString);
+  const normalizedDateTime = new Date(dateTimeString);
+console.log('normalizedDateTime: ', normalizedDateTime);
+  if (isNaN(normalizedDateTime.getTime())) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid dateTime');
+  }
+
+  return normalizedDateTime;
+};
+
 const getUserSadanaTracker = async (userId) => {
   const sadanaEntries = SadanaTracker.find({ user: userId }).sort({ date: -1 });
   return sadanaEntries;
@@ -35,22 +46,9 @@ const getSadanas = async (userId, startDate, endDate) => {
   return sadanaEntries;
 };
 
-const getSadanasForLast7Days = async (userId, date) => {
-  const today = normalizeDate(date);
-  const sevenDaysAgo = new Date(today);
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-
-  return SadanaTracker.find({
-    user: userId,
-    date: {
-      $gte: sevenDaysAgo,
-      $lte: today,
-    },
-  }).sort({ date: -1 });
-};
-
-const addOptedSadana = async (userId, date, sadanaId) => {
-  const normalizedDate = normalizeDate(date);
+const addOptedSadana = async (userId, dateTime, sadanaId) => {
+  const normalizedDateTime = normalizeDateTime(dateTime);
+  const dateOnly = normalizeDate(dateTime);
 
   const sadanaExists = await Sadana.exists({ _id: sadanaId });
 
@@ -60,42 +58,50 @@ const addOptedSadana = async (userId, date, sadanaId) => {
 
   const existingEntry = await SadanaTracker.findOne({
     user: userId,
-    date: normalizedDate,
+    date: dateOnly,
   });
+
+  const sadanaObject = {
+    sadana: sadanaId,
+    time: normalizedDateTime,
+  };
 
   if (!existingEntry) {
     return SadanaTracker.create({
       user: userId,
-      date: normalizedDate,
-      optedSadanas: [sadanaId],
+      date: dateOnly,
+      optedSadanas: [sadanaObject],
     });
-  }
-
-  if (existingEntry.optedSadanas.includes(sadanaId)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Sadana already opted for this date');
   }
 
   return SadanaTracker.findByIdAndUpdate(
     existingEntry._id,
     {
-      $addToSet: { optedSadanas: sadanaId },
+      $push: { optedSadanas: sadanaObject },
     },
     { new: true }
   );
 };
 
-const deleteOptedSadana = async (userId, date, sadanaId) => {
+const deleteOptedSadana = async (userId, dateTime, sadanaId) => {
+  const normalizedDateTime = normalizeDateTime(dateTime);
+  const dateOnly = normalizeDate(dateTime);
+  console.log('dateTime: ', dateTime);
+
   const updatedEntry = await SadanaTracker.findOneAndUpdate(
     {
       user: userId,
-      date: normalizeDate(date),
+      date: dateOnly,
     },
     {
-      $pull: { optedSadanas: sadanaId },
+      $pull: {
+        optedSadanas: {
+          sadana: sadanaId,
+          time: normalizedDateTime,
+        },
+      },
     },
-    {
-      new: true,
-    }
+    { new: true }
   );
 
   if (!updatedEntry) return null;
@@ -116,7 +122,9 @@ const recalcUserSadhanaPoints = async (userId) => {
     return 0;
   }
 
-  const allSadanaIds = trackers.flatMap((t) => t.optedSadanas);
+  const allSadanaIds = trackers.flatMap((t) =>
+    t.optedSadanas.map((entry) => entry.sadana.toString())
+  );
 
   if (!allSadanaIds.length) {
     await userService.updateUserById(userId, { sadhanaPoints: 0 });
@@ -127,10 +135,12 @@ const recalcUserSadhanaPoints = async (userId) => {
     .select('_id points')
     .lean();
 
-  const pointsMap = new Map(sadanas.map((s) => [s._id.toString(), s.points]));
+  const pointsMap = new Map(
+    sadanas.map((s) => [s._id.toString(), s.points])
+  );
 
   const totalPoints = allSadanaIds.reduce((sum, id) => {
-    return sum + (pointsMap.get(id.toString()) || 0);
+    return sum + (pointsMap.get(id) || 0);
   }, 0);
 
   await userService.updateUserById(userId, { sadhanaPoints: totalPoints });
@@ -139,22 +149,29 @@ const recalcUserSadhanaPoints = async (userId) => {
 };
 
 const syncUserSadanas = async (userId, data) => {
-  const operations = data.map((item) => ({
-    updateOne: {
-      filter: {
-        user: userId,
-        date: normalizeDate(item.date),
-      },
-      update: {
-        $addToSet: {
-          optedSadanas: {
-            $each: item.optedSadanas.map((id) => new mongoose.Types.ObjectId(id)),
+  const operations = data.map((item) => {
+    const dateOnly = getDateOnlyUTC(item.date);
+
+    return {
+      updateOne: {
+        filter: {
+          user: userId,
+          date: dateOnly,
+        },
+        update: {
+          $push: {
+            optedSadanas: {
+              $each: item.optedSadanas.map((entry) => ({
+                sadana: new mongoose.Types.ObjectId(entry.sadana),
+                time: new Date(entry.time),
+              })),
+            },
           },
         },
+        upsert: true,
       },
-      upsert: true,
-    },
-  }));
+    };
+  });
 
   await SadanaTracker.bulkWrite(operations);
 
@@ -174,9 +191,8 @@ const deleteSadanas = async (userId) => {
 module.exports = {
   getSadanas,
   getUserSadanaTracker,
-  getSadanasForLast7Days,
-  deleteOptedSadana,
   addOptedSadana,
+  deleteOptedSadana,
   recalcUserSadhanaPoints,
   syncUserSadanas,
   deleteSadanas,

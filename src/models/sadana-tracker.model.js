@@ -17,8 +17,15 @@ const sadanaTrackerSchema = mongoose.Schema({
 
   optedSadanas: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Sadana',
+      sadana: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Sadana',
+        required: true,
+      },
+      time: {
+        type: Date,
+        required: true,
+      },
     },
   ],
 });

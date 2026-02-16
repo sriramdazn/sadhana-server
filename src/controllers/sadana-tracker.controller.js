@@ -13,9 +13,9 @@ const getFullSadanaTracker = async (req, res) => {
 
 const addOptedSadana = async (req, res) => {
   const userId = req.user.id;
-  const { date, sadanaId } = req.body;
+  const { dateTime, sadanaId } = req.body;
 
-  const updatedEntry = await sadanaTrackerService.addOptedSadana(userId, date, sadanaId);
+  const updatedEntry = await sadanaTrackerService.addOptedSadana(userId, dateTime, sadanaId);
 
   const totalPoints = await sadanaTrackerService.recalcUserSadhanaPoints(userId);
 
@@ -28,9 +28,9 @@ const addOptedSadana = async (req, res) => {
 
 const deleteOptedSadana = async (req, res) => {
   const userId = req.user.id;
-  const { date, sadanaId } = req.body;
+  const { dateTime, sadanaId } = req.body;
 
-  const updatedEntry = await sadanaTrackerService.deleteOptedSadana(userId, date, sadanaId);
+  const updatedEntry = await sadanaTrackerService.deleteOptedSadana(userId, dateTime, sadanaId);
 
   const totalPoints = await sadanaTrackerService.recalcUserSadhanaPoints(userId);
 

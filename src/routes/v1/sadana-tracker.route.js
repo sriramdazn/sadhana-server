@@ -1,5 +1,9 @@
 const express = require('express');
-const { getFullSadanaTracker, addOptedSadana, deleteOptedSadana } = require('../../controllers/sadana-tracker.controller');
+const {
+  getFullSadanaTracker,
+  addOptedSadana,
+  deleteOptedSadana,
+} = require('../../controllers/sadana-tracker.controller');
 const auth = require('../../middlewares/auth');
 
 const router = express.Router();
