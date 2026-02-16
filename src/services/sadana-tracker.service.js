@@ -143,7 +143,7 @@ const recalcUserSadhanaPoints = async (userId) => {
 
 const syncUserSadanas = async (userId, data) => {
   const operations = data.map((item) => {
-    const dateOnly = getDateOnlyUTC(item.date);
+  const dateOnly = normalizeDate(item.date);
 
     return {
       updateOne: {
