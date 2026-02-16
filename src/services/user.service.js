@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
-const { sadanaTrackerService } = require('./index');
+const sadanaTrackerService = require('./sadana-tracker.service');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -78,7 +78,6 @@ const updateUserById = async (userId, updateBody) => {
 /**
  * Reset user by id
  * @param {ObjectId} userId
- * @param {Object} updateBody
  * @returns {Promise<User>}
  */
 const resetUserById = async (userId) => {
@@ -87,9 +86,8 @@ const resetUserById = async (userId) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  const sadana = await sadanaTrackerService.getSadanas(userId);
-
-  if (sadana && sadana.length > 0) {
+  const sadanas = await sadanaTrackerService.getUserSadanaTracker(userId);
+  if (sadanas && sadanas.length > 0) {
     await sadanaTrackerService.deleteSadanas(userId);
   }
 

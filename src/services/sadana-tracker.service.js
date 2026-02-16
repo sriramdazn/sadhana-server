@@ -16,11 +16,16 @@ const normalizeDate = (dateString) => {
   return d.toISOString();
 };
 
+const getUserSadanaTracker = async (userId) => {
+  const sadanaEntries = SadanaTracker.find({ user: userId }).sort({ date: -1 });
+  return sadanaEntries;
+};
+
 const getSadanas = async (userId, startDate, endDate) => {
   if (!startDate || !endDate) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid start or end date');
   }
-  const sadanaEntries = await SadanaTracker.find({
+  const sadanaEntries = SadanaTracker.find({
     user: userId,
     date: {
       $gte: normalizeDate(startDate),
@@ -168,6 +173,7 @@ const deleteSadanas = async (userId) => {
 
 module.exports = {
   getSadanas,
+  getUserSadanaTracker,
   getSadanasForLast7Days,
   deleteOptedSadana,
   addOptedSadana,

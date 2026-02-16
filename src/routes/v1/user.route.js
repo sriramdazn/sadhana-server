@@ -7,7 +7,7 @@ const userValidation = require('../../validations/user.validation');
 const router = express.Router();
 
 router.route('/').get(auth(), userController.getAuthUser);
-router.route('/').post(auth(), userController.resetUser);
+router.route('/reset-journey').post(auth(), userController.resetUser);
 router.route('/').patch(auth(), validate(userValidation.updateUser), userController.updateUser);
 router.route('/retriev-all').get(auth('getUsers'), userController.getUsers);
 
