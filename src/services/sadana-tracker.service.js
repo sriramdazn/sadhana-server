@@ -17,10 +17,8 @@ const normalizeDate = (dateString) => {
 };
 
 const normalizeDateTime = (dateTimeString) => {
-  console.log('dateTimeString: ', dateTimeString);
   const normalizedDateTime = new Date(dateTimeString);
-console.log('normalizedDateTime: ', normalizedDateTime);
-  if (isNaN(normalizedDateTime.getTime())) {
+  if (Number.isNaN(normalizedDateTime.getTime())) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid dateTime');
   }
 
@@ -86,7 +84,6 @@ const addOptedSadana = async (userId, dateTime, sadanaId) => {
 const deleteOptedSadana = async (userId, dateTime, sadanaId) => {
   const normalizedDateTime = normalizeDateTime(dateTime);
   const dateOnly = normalizeDate(dateTime);
-  console.log('dateTime: ', dateTime);
 
   const updatedEntry = await SadanaTracker.findOneAndUpdate(
     {
@@ -122,9 +119,7 @@ const recalcUserSadhanaPoints = async (userId) => {
     return 0;
   }
 
-  const allSadanaIds = trackers.flatMap((t) =>
-    t.optedSadanas.map((entry) => entry.sadana.toString())
-  );
+  const allSadanaIds = trackers.flatMap((t) => t.optedSadanas.map((entry) => entry.sadana.toString()));
 
   if (!allSadanaIds.length) {
     await userService.updateUserById(userId, { sadhanaPoints: 0 });
@@ -135,9 +130,7 @@ const recalcUserSadhanaPoints = async (userId) => {
     .select('_id points')
     .lean();
 
-  const pointsMap = new Map(
-    sadanas.map((s) => [s._id.toString(), s.points])
-  );
+  const pointsMap = new Map(sadanas.map((s) => [s._id.toString(), s.points]));
 
   const totalPoints = allSadanaIds.reduce((sum, id) => {
     return sum + (pointsMap.get(id) || 0);
