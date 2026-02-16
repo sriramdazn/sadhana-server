@@ -6,7 +6,7 @@ const { userService } = require('../services');
 
 const createUser = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
-  res.status(httpStatus.CREATED).send(user);
+  res.status(httpStatus.CREATED).send({ user, message: 'User created successfully' });
 });
 
 const getUsers = catchAsync(async (req, res) => {
@@ -21,7 +21,7 @@ const getAuthUser = catchAsync(async (req, res) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-  res.send(user);
+  res.status(httpStatus.OK).send(user);
 });
 
 const getUser = catchAsync(async (req, res) => {
@@ -29,17 +29,22 @@ const getUser = catchAsync(async (req, res) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-  res.send(user);
+  res.status(httpStatus.OK).send(user);
 });
 
 const updateUser = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user.id, req.body);
-  res.send(user);
+  res.status(httpStatus.OK).send({ user, message: 'User updated successfully' });
+});
+
+const resetUser = catchAsync(async (req, res) => {
+  const user = await userService.resetUserById(req.user.id);
+  res.status(httpStatus.OK).send({ user, message: 'User reset successfully' });
 });
 
 const deleteUser = catchAsync(async (req, res) => {
   await userService.deleteUserById(req.params.userId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(httpStatus.NO_CONTENT).send({ message: 'User deleted successfully' });
 });
 
 module.exports = {
@@ -48,5 +53,6 @@ module.exports = {
   getUser,
   getAuthUser,
   updateUser,
+  resetUser,
   deleteUser,
 };

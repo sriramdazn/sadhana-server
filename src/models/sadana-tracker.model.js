@@ -1,31 +1,28 @@
 const mongoose = require('mongoose');
 const { toJSON, paginate } = require('./plugins');
 
-const sadanaTrackerSchema = mongoose.Schema(
-  {
-    user: {
+const sadanaTrackerSchema = mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  },
+
+  date: {
+    type: Date,
+    required: true,
+    index: true,
+  },
+
+  optedSadanas: [
+    {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-      index: true,
+      ref: 'Sadana',
     },
+  ],
+});
 
-    date: {
-      type: Date,
-      required: true,
-      index: true,
-    },
-
-    optedSadanas: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Sadana',
-      },
-    ],
-  }
-);
-
-// ✅ Ensure one entry per user per day
 sadanaTrackerSchema.index({ user: 1, date: 1 }, { unique: true });
 
 sadanaTrackerSchema.plugin(toJSON);

@@ -20,13 +20,14 @@ const getSadanas = async (userId, startDate, endDate) => {
   if (!startDate || !endDate) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid start or end date');
   }
-  return await SadanaTracker.find({
+  const sadanaEntries = await SadanaTracker.find({
     user: userId,
     date: {
       $gte: normalizeDate(startDate),
       $lte: normalizeDate(endDate),
     },
   }).sort({ date: -1 });
+  return sadanaEntries;
 };
 
 const getSadanasForLast7Days = async (userId, date) => {
@@ -155,6 +156,16 @@ const syncUserSadanas = async (userId, data) => {
   return { success: true };
 };
 
+/**
+ * Delete user by id
+ * @param {ObjectId} userId
+ * @returns {Promise<SadanaTracker>}
+ */
+const deleteSadanas = async (userId) => {
+  const result = await SadanaTracker.deleteMany({ user: userId });
+  return result;
+};
+
 module.exports = {
   getSadanas,
   getSadanasForLast7Days,
@@ -162,4 +173,5 @@ module.exports = {
   addOptedSadana,
   recalcUserSadhanaPoints,
   syncUserSadanas,
+  deleteSadanas,
 };

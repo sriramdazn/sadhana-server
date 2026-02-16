@@ -1,10 +1,9 @@
 const httpStatus = require('http-status');
 // eslint-disable-next-line import/no-unresolved
 const { v6: uuid6 } = require('uuid');
-const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
-const { Otp } = require('../models');
+const { Token, Otp } = require('../models');
 
 /**
  * Save OTP
@@ -27,6 +26,9 @@ const saveOtp = async (email, otp) => {
  */
 
 const verifyOtp = async (otpId, otp) => {
+  if (!/^\d{4}$/.test(otp)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP must be a 4-digit number');
+  }
   const validateUser = await Otp.findOne({ otpId, otp });
   if (!validateUser) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid or expired OTP');

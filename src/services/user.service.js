@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
+const { sadanaTrackerService } = require('./index');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -56,10 +57,46 @@ const updateUserById = async (userId, updateBody) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-  if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+
+  const allowedUpdates = ['sadhanaPoints', 'decayPoints'];
+  const filteredUpdateBody = {};
+
+  allowedUpdates.forEach((key) => {
+    if (updateBody[key] !== undefined) {
+      filteredUpdateBody[key] = updateBody[key];
+    }
+  });
+
+  if (filteredUpdateBody.decayPoints !== undefined && filteredUpdateBody.decayPoints >= 0) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Decay Points must be a negative number');
   }
-  Object.assign(user, updateBody);
+  Object.assign(user, filteredUpdateBody);
+  await user.save();
+  return user;
+};
+
+/**
+ * Reset user by id
+ * @param {ObjectId} userId
+ * @param {Object} updateBody
+ * @returns {Promise<User>}
+ */
+const resetUserById = async (userId) => {
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const sadana = await sadanaTrackerService.getSadanas(userId);
+
+  if (sadana && sadana.length > 0) {
+    await sadanaTrackerService.deleteSadanas(userId);
+  }
+
+  Object.assign(user, {
+    sadhanaPoints: 0,
+    decayPoints: -50,
+  });
   await user.save();
   return user;
 };
@@ -84,5 +121,6 @@ module.exports = {
   getUserById,
   getUserByEmail,
   updateUserById,
+  resetUserById,
   deleteUserById,
 };

@@ -5,14 +5,15 @@ const { generateOtp } = require('../utils/util');
 
 const requestOtpForEmail = catchAsync(async (req, res) => {
   const { email } = req.body;
-  const otp = "123456"; //generateOtp();
+  // const otp = generateOtp();
+  const otp = 1234;
   const savedOtp = await authService.saveOtp(email, otp);
   // await emailService.sendEmail(email, 'Email Verification', `Your verification code is ${otp}`);
   res.status(httpStatus.OK).send({ otpId: savedOtp.otpId, message: 'Verification OTP sent to email' });
 });
 
 const verifyOtpAndAuthenticate = catchAsync(async (req, res) => {
-  const { otpId, otp, sadanas } = req.body;
+  const { otpId, otp, sadanas, sadhanaPoints, decayPoints } = req.body;
 
   const validatedOtp = await authService.verifyOtp(otpId, otp);
 
@@ -22,6 +23,8 @@ const verifyOtpAndAuthenticate = catchAsync(async (req, res) => {
     user = await userService.createUser({
       email: validatedOtp.email,
       isEmailVerified: true,
+      sadhanaPoints,
+      decayPoints,
     });
   }
   const tokens = await tokenService.generateAuthTokens(user);

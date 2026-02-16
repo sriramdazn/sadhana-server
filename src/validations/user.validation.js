@@ -7,6 +7,12 @@ const createUser = {
     role: Joi.string().required().valid('user', 'admin'),
   }),
 };
+const updateUser = {
+  body: Joi.object().keys({
+    sadhanaPoints: Joi.number(),
+    decayPoints: Joi.number().negative(),
+  }),
+};
 
 const getUsers = {
   query: Joi.object().keys({
@@ -34,5 +40,6 @@ module.exports = {
   createUser,
   getUsers,
   getUser,
+  updateUser,
   deleteUser,
 };

@@ -1,11 +1,14 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const userController = require('../../controllers/user.controller');
+const validate = require('../../middlewares/validate');
+const userValidation = require('../../validations/user.validation');
 
 const router = express.Router();
 
 router.route('/').get(auth(), userController.getAuthUser);
-router.route('/').patch(auth(), userController.updateUser);
+router.route('/').post(auth(), userController.resetUser);
+router.route('/').patch(auth(), validate(userValidation.updateUser), userController.updateUser);
 router.route('/retriev-all').get(auth('getUsers'), userController.getUsers);
 
 module.exports = router;

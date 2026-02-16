@@ -28,7 +28,7 @@ const userSchema = mongoose.Schema(
     },
     sadhanaPoints: {
       type: Number,
-      default: 50,
+      default: 0,
     },
     decayPoints: {
       type: Number,

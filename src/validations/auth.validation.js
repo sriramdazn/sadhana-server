@@ -17,6 +17,8 @@ const verifyEmail = {
     otpId: Joi.string().required(),
     otp: Joi.number().required(),
     sadanas: Joi.array(),
+    sadhanaPoints: Joi.number(),
+    decayPoints: Joi.number(),
   }),
 };
 
