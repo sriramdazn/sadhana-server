@@ -49,7 +49,7 @@ const getSadanasForLast7Days = async (userId, date) => {
   }).sort({ date: -1 });
 };
 
-const addOptedSadana = async (userId, dateTime, sadanaId) => {
+const addOptedSadana = async (userId, date, sadanaId) => {
   const normalizedDate = normalizeDate(date);
 
   const sadanaExists = await Sadana.exists({ _id: sadanaId });
