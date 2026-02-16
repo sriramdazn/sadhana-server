@@ -3,18 +3,8 @@ const { sadanaTrackerService } = require('../services');
 
 const getFullSadanaTracker = async (req, res) => {
   const userId = req.user.id;
-  const sadhanas = await sadanaTrackerService.getSadanas(userId);
-
-  res.status(httpStatus.OK).send({
-    data: sadhanas,
-  });
-};
-
-const getSadanaTrackerForLast7Days = async (req, res) => {
-  const userId = req.user.id;
-  const { date } = req.body;
-
-  const sadhanas = await sadanaTrackerService.getSadanasForLast7Days(userId, date);
+  const { startDate, endDate } = req.body;
+  const sadhanas = await sadanaTrackerService.getSadanas(userId, startDate, endDate);
 
   res.status(httpStatus.OK).send({
     data: sadhanas,
@@ -53,7 +43,6 @@ const deleteOptedSadana = async (req, res) => {
 
 module.exports = {
   getFullSadanaTracker,
-  getSadanaTrackerForLast7Days,
   addOptedSadana,
   deleteOptedSadana,
 };

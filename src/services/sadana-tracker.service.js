@@ -16,8 +16,17 @@ const normalizeDate = (dateString) => {
   return d.toISOString();
 };
 
-const getSadanas = async (userId) => {
-  return SadanaTracker.find({ user: userId }).sort({ date: -1 });
+const getSadanas = async (userId, startDate, endDate) => {
+  if (!startDate || !endDate) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid start or end date');
+  }
+  return await SadanaTracker.find({
+    user: userId,
+    date: {
+      $gte: normalizeDate(startDate),
+      $lte: normalizeDate(endDate),
+    },
+  }).sort({ date: -1 });
 };
 
 const getSadanasForLast7Days = async (userId, date) => {
@@ -34,7 +43,7 @@ const getSadanasForLast7Days = async (userId, date) => {
   }).sort({ date: -1 });
 };
 
-const addOptedSadana = async (userId, date, sadanaId) => {
+const addOptedSadana = async (userId, dateTime, sadanaId) => {
   const normalizedDate = normalizeDate(date);
 
   const sadanaExists = await Sadana.exists({ _id: sadanaId });
