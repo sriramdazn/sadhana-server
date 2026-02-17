@@ -4,9 +4,8 @@ const { sadanaTrackerService } = require('../services');
 
 const getFullSadanaTracker = async (req, res) => {
   const userId = req.user.id;
-  const { startDate, endDate } = req.query;
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const sadhanas = await sadanaTrackerService.querySadanas(userId, startDate, endDate, options);
+  const sadhanas = await sadanaTrackerService.querySadanas(userId, options);
   if (!sadhanas.results || sadhanas.results.length === 0) {
     return res.status(httpStatus.NOT_FOUND).send({ message: 'No sadanas found for the user' });
   }

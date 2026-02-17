@@ -26,28 +26,21 @@ const normalizeDateTime = (dateTimeString) => {
 };
 
 const getUserSadanaTracker = async (userId) => {
-  const sadanaEntries = SadanaTracker.find({ user: userId }).sort({ date: -1 });
+  const sadanaEntries = await SadanaTracker.find({ user: userId }).sort({ date: -1 });
   return sadanaEntries;
 };
 
-const querySadanas = async (userId, startDate, endDate, options) => {
-  const filter = {
-    user: userId,
-    date: {
-      $gte: normalizeDate(startDate),
-      $lte: normalizeDate(endDate),
-    },
-  };
-  const sadanaEntries = await SadanaTracker.paginate(filter, options);
-  return sadanaEntries;
+const querySadanas = async (userId, options) => {
+  const filter = { user: userId };
+  const sadanas = await SadanaTracker.paginate(filter, options);
+  return sadanas;
 };
 
 const addOptedSadana = async (userId, dateTime, sadanaId) => {
   const normalizedDateTime = normalizeDateTime(dateTime);
   const dateOnly = normalizeDate(dateTime);
 
-  const sadanaExists = await Sadana.exists({ _id: sadanaId });
-
+  const sadanaExists = await Sadana.findById(sadanaId);
   if (!sadanaExists) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid sadanaId');
   }
@@ -165,7 +158,7 @@ const syncUserSadanas = async (userId, data) => {
   });
 
   await SadanaTracker.bulkWrite(operations);
-  recalcUserSadhanaPoints(userId);
+  await recalcUserSadhanaPoints(userId);
 
   return { success: true };
 };
