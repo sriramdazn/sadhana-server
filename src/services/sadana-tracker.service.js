@@ -133,29 +133,32 @@ const recalcUserSadhanaPoints = async (userId) => {
 };
 
 const syncUserSadanas = async (userId, data) => {
-  const operations = data.map((item) => {
-    const dateOnly = normalizeDate(item.date);
+  const groupedByDate = {};
 
-    return {
-      updateOne: {
-        filter: {
-          user: userId,
-          date: dateOnly,
-        },
-        update: {
-          $push: {
-            optedSadanas: {
-              $each: item.optedSadanas.map((entry) => ({
-                sadana: new mongoose.Types.ObjectId(entry.sadanaId),
-                dateTime: new Date(entry.dateTime),
-              })),
-            },
-          },
-        },
-        upsert: true,
-      },
-    };
+  data.forEach((entry) => {
+    const dateOnly = normalizeDate(entry.dateTime);
+
+    if (!groupedByDate[dateOnly]) {
+      groupedByDate[dateOnly] = [];
+    }
+
+    groupedByDate[dateOnly].push({
+      sadana: new mongoose.Types.ObjectId(entry.sadanaId),
+      dateTime: new Date(entry.dateTime),
+    });
   });
+
+  const operations = Object.keys(groupedByDate).map((date) => ({
+    updateOne: {
+      filter: { user: userId, date: new Date(date) },
+      update: {
+        $push: {
+          optedSadanas: { $each: groupedByDate[date] },
+        },
+      },
+      upsert: true,
+    },
+  }));
 
   await SadanaTracker.bulkWrite(operations);
   await recalcUserSadhanaPoints(userId);
