@@ -30,10 +30,11 @@ const sadanaTrackerSchema = mongoose.Schema({
   ],
 });
 
-sadanaTrackerSchema.index({ user: 1, date: 1 }, { unique: true });
-
+// add plugin that converts mongoose to json
 sadanaTrackerSchema.plugin(toJSON);
 sadanaTrackerSchema.plugin(paginate);
+
+sadanaTrackerSchema.index({ user: 1, date: 1 }, { unique: true });
 
 /**
  * @typedef SadanaTracker

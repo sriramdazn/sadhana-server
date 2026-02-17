@@ -30,17 +30,15 @@ const getUserSadanaTracker = async (userId) => {
   return sadanaEntries;
 };
 
-const getSadanas = async (userId, startDate, endDate) => {
-  if (!startDate || !endDate) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid start or end date');
-  }
-  const sadanaEntries = SadanaTracker.find({
+const querySadanas = async (userId, startDate, endDate, options) => {
+  const filter = {
     user: userId,
     date: {
       $gte: normalizeDate(startDate),
       $lte: normalizeDate(endDate),
     },
-  }).sort({ date: -1 });
+  };
+  const sadanaEntries = await SadanaTracker.paginate(filter, options);
   return sadanaEntries;
 };
 
@@ -143,7 +141,7 @@ const recalcUserSadhanaPoints = async (userId) => {
 
 const syncUserSadanas = async (userId, data) => {
   const operations = data.map((item) => {
-  const dateOnly = normalizeDate(item.date);
+    const dateOnly = normalizeDate(item.date);
 
     return {
       updateOne: {
@@ -182,7 +180,7 @@ const deleteSadanas = async (userId) => {
 };
 
 module.exports = {
-  getSadanas,
+  querySadanas,
   getUserSadanaTracker,
   addOptedSadana,
   deleteOptedSadana,

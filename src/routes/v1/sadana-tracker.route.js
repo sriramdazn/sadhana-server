@@ -1,13 +1,15 @@
 const express = require('express');
-const { getFullSadanaTracker, addOptedSadana, deleteOptedSadana } = require('../../controllers/sadana-tracker.controller');
+const sadanaTracker = require('../../controllers/sadana-tracker.controller');
 const auth = require('../../middlewares/auth');
 
 const router = express.Router();
 
 router.use(auth());
 
-router.get('/', getFullSadanaTracker);
-router.post('/', addOptedSadana);
-router.delete('/', deleteOptedSadana);
+router
+  .route('/')
+  .get(sadanaTracker.getFullSadanaTracker)
+  .post(sadanaTracker.addOptedSadana)
+  .delete(sadanaTracker.deleteOptedSadana);
 
 module.exports = router;
