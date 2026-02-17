@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const pick = require('../utils/pick');
+const catchAsync = require('../utils/catchAsync');
 const { sadanaTrackerService } = require('../services');
 
 const getFullSadanaTracker = async (req, res) => {
@@ -12,7 +13,7 @@ const getFullSadanaTracker = async (req, res) => {
   res.status(httpStatus.OK).send(sadhanas);
 };
 
-const addOptedSadana = async (req, res) => {
+const addOptedSadana = catchAsync(async (req, res) => {
   const userId = req.user.id;
   const { dateTime, sadanaId } = req.body;
 
@@ -25,9 +26,9 @@ const addOptedSadana = async (req, res) => {
     data: updatedEntry,
     totalSadhanaPoints: totalPoints,
   });
-};
+});
 
-const deleteOptedSadana = async (req, res) => {
+const deleteOptedSadana = catchAsync(async (req, res) => {
   const userId = req.user.id;
   const { dateTime, sadanaId } = req.body;
 
@@ -40,7 +41,7 @@ const deleteOptedSadana = async (req, res) => {
     data: updatedEntry,
     totalSadhanaPoints: totalPoints,
   });
-};
+});
 
 module.exports = {
   getFullSadanaTracker,
