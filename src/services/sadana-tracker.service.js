@@ -59,7 +59,7 @@ const addOptedSadana = async (userId, dateTime, sadanaId) => {
 
   const sadanaObject = {
     sadana: sadanaId,
-    time: normalizedDateTime,
+    dateTime: normalizedDateTime,
   };
 
   if (!existingEntry) {
@@ -92,7 +92,7 @@ const deleteOptedSadana = async (userId, dateTime, sadanaId) => {
       $pull: {
         optedSadanas: {
           sadana: sadanaId,
-          time: normalizedDateTime,
+          dateTime: normalizedDateTime,
         },
       },
     },

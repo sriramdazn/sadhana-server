@@ -22,7 +22,7 @@ const sadanaTrackerSchema = mongoose.Schema({
         ref: 'Sadana',
         required: true,
       },
-      time: {
+      dateTime: {
         type: Date,
         required: true,
       },
