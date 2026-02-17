@@ -165,6 +165,7 @@ const syncUserSadanas = async (userId, data) => {
   });
 
   await SadanaTracker.bulkWrite(operations);
+  recalcUserSadhanaPoints(userId);
 
   return { success: true };
 };
