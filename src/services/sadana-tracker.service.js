@@ -132,10 +132,10 @@ const recalcUserSadhanaPoints = async (userId) => {
   return totalPoints;
 };
 
-const syncUserSadanas = async (userId, data) => {
+const syncUserSadanas = async (userId, sadanas) => {
   const groupedByDate = {};
 
-  data.forEach((entry) => {
+  sadanas.forEach((entry) => {
     const dateOnly = normalizeDate(entry.dateTime);
 
     if (!groupedByDate[dateOnly]) {

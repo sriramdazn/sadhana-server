@@ -4,7 +4,7 @@ const { sadanaService } = require('../services');
 const listSadanas = async (req, res) => {
   const sadhanas = await sadanaService.getSadanas();
   res.status(httpStatus.OK).send({
-    data: sadhanas,
+    sadanas: sadhanas,
   });
 };
 
