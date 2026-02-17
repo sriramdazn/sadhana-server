@@ -153,8 +153,8 @@ const syncUserSadanas = async (userId, data) => {
           $push: {
             optedSadanas: {
               $each: item.optedSadanas.map((entry) => ({
-                sadana: new mongoose.Types.ObjectId(entry.sadana),
-                time: new Date(entry.time),
+                sadana: new mongoose.Types.ObjectId(entry.sadanaId),
+                dateTime: new Date(entry.dateTime),
               })),
             },
           },
