@@ -5,10 +5,9 @@ const { generateOtp } = require('../utils/util');
 
 const requestOtpForEmail = catchAsync(async (req, res) => {
   const { email } = req.body;
-  // const otp = generateOtp();
-  const otp = 1234;
+  const otp = generateOtp();
   const savedOtp = await authService.saveOtp(email, otp);
-  // await emailService.sendEmail(email, 'Email Verification', `Your verification code is ${otp}`);
+  await emailService.sendOTPEmail(email, otp);
   res.status(httpStatus.OK).send({ otpId: savedOtp.otpId, message: 'Verification OTP sent to email' });
 });
 
